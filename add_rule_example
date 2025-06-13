@@ -1,0 +1,1 @@
+sudo nft add rule inet filter output tcp sport 1714-1764 drop
