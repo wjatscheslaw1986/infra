@@ -5,14 +5,19 @@ table inet filter {
                 type filter hook input priority filter; policy drop;
                 iifname "lo" accept
                 ip saddr 127.0.0.0/8 drop
-                ip6 saddr ::1 drop
                 ct state invalid drop
                 ct state { established, related } accept
+                ip6 saddr ::1 drop
+                tcp dport 55404 accept
+#               tcp dport 990 accept
+#               tcp dport 21100-21110 accept
         }
 
         chain forward {
                 type filter hook forward priority filter; policy drop;
                 ct state { established, related } accept
+                iifname "ens3" oifname "tun16" ct state { established, related } accept
+                iifname "tun16" oifname "ens3" accept
         }
 
         chain output {
@@ -22,6 +27,7 @@ table inet filter {
 table inet nat {
         chain postrouting {
                 type nat hook postrouting priority filter; policy accept;
-                oifname "enp0s31f6" masquerade random
+#               oifname "ens3" masquerade random
+                oifname "ens3" iifname "tun16" masquerade random
         }
 }

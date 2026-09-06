@@ -1,0 +1,27 @@
+sudo cryptsetup luksChangeKey /dev/sda1
+
+sudo cp kek/superslavick2024.ovpn /etc/openvpn/client
+
+sudo systemctl start openvpn-client@superslavick2024.ovpn
+
+chmod 400 .ssh/keketu
+ssh -p 5902 -i .ssh/keketu superslavick@192.168.173.9
+sudo openvpn --config /etc/openvpn/client/superslavick2024.ovpn.conf
+ssh -L 59001:192.168.173.9:5901 -p 5902 -i .ssh/key superslavick@192.168.173.9
+xhost si:localuser:browser
+sudo setfacl -m u:100007:rw /dev/snd/*
+
+А инструкция будет такая (будем править по ходу):
+1. добавить в файл с расширением ovpn следующие строки
+auth-nocache
+tls-version-min 1.0
+tls-cert-profile insecure
+providers legacy default
+compat-mode 2.3.0
+2. Обезопасить себя, раскомментировав или добавив 
+user nobody
+group nogroup
+3. переименовать файл так, чтобы окончание было conf и положить в правильное место /etc/openvpn/client/superslavick2024.ovpn.conf
+Для удобства можно установить утилиту screen, чтобы оболочку с запущенным VPN прятать, но чтобы можно было заглядывать. Мне так удобно
+Ну и 4. - запускаем так sudo openvpn --config /etc/openvpn/client/superslavick2024.ovpn.conf
+Версия openvpn последняя, просто из репозитория устанавливаешь
