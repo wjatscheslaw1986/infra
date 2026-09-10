@@ -3,26 +3,26 @@
 #Assuming the ssh tunnel command was 'sudo ssh -w 16:16 -p XXXXX -i ~/.ssh/mtelecom root@XXX.XXX.XXX.XXX'
 readonly TUNNEL_INTERFACE_NAME=tun16
 
-ip link show $TUNNEL_INTERFACE_NAME
-
-if [ $? -eq 1 ]; then
-    echo "You have probably forgot to establish the ssh tunnel first of all. Try 'sudo ssh -w 16:16 -p \$REMOTE_SSH_PORT -i ~/.ssh/mtelecom root@\$REMOTE_SSH_IP'"
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root."
     exit 1
 fi
 
-REMOTE_SSH_IP=$1
+if ! ip link show $TUNNEL_INTERFACE_NAME >/dev/null 2>&1; then
+    echo "Tunnel interface $TUNNEL_INTERFACE_NAME doesn't exist."
+    echo "Establish the SSH tunnel first:"
+    echo "sudo ssh -w 16:16 -p $REMOTE_SSH_PORT -i ~/.ssh/private.key root@$REMOTE_SSH_IP"
+    exit 1
+fi
+
+REMOTE_SSH_IP=${1:-}
 
 if [ -z $REMOTE_SSH_IP ]; then
     echo "Remote server IP isn't set, but required"
     exit 1
 fi
 
-REMOTE_SSH_PORT=$2
-
-if [ -z $REMOTE_SSH_PORT ]; then
-    REMOTE_SSH_PORT=22
-fi
-
+REMOTE_SSH_PORT=${2:-22}
 GATEWAY_IP=$(ip addr show $(ip -4 route | grep -E "^default" | head -n 1 | awk '{print $5}') | grep inet | head -n 1 | awk '{print $2}' | cut -d/ -f1)
 TUNNEL_REMOTE_END_IP=$(ip -4 route | grep "tun16 proto" | awk '{print $1}')
 TUNNEL_LOCAL_END_IP=$(ip -4 route | grep "tun16 proto" | awk '{print $9}')
