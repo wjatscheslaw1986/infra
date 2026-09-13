@@ -1,1 +1,0 @@
-curl -fsSL https://raw.githubusercontent.com/mviereck/x11docker/master/x11docker -o ~/.local/bin/x11docker
