@@ -37,7 +37,9 @@ fi
 
 #Leaving the route not to lock ourselves out of the tunnel
 ip route replace "$REMOTE_SSH_IP"/32 via "$GATEWAY_IP" dev "$GATEWAY_DEV"
-ip addr replace "$TUNNEL_LOCAL_END_IP"/30 peer "$TUNNEL_REMOTE_END_IP" dev "$TUNNEL_INTERFACE_NAME"
+ip addr replace "$TUNNEL_LOCAL_END_IP" peer "$TUNNEL_REMOTE_END_IP" dev "$TUNNEL_INTERFACE_NAME"
+#Using /30 subnet is a compatibility hack for the case if either end of the tunnel doesn't implement RFC 3021
+#ip addr replace "$TUNNEL_LOCAL_END_IP"/30 peer "$TUNNEL_REMOTE_END_IP" dev "$TUNNEL_INTERFACE_NAME"
 ip link set "$TUNNEL_INTERFACE_NAME" up
 ip route replace default via "$TUNNEL_REMOTE_END_IP" dev "$TUNNEL_INTERFACE_NAME"
 
